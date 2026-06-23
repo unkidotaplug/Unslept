@@ -1,5 +1,129 @@
 import SwiftUI
 
+// ── Liquid Glass card modifier ─────────────────────────────────────────────
+// Layered approach matching Apple's macOS 26 / iOS 26 glass:
+//   1. ultraThinMaterial base (blur + vibrancy)
+//   2. Optional color tint
+//   3. Top specular highlight  ← the defining glass element
+//   4. Bottom inner reflection ← gives thickness/depth
+//   5. Gradient rim border     ← bright top, dark bottom (lit from above)
+//   6. Drop shadow             ← lifts the pane off the surface
+private struct LiquidGlassModifier: ViewModifier {
+    var cornerRadius: CGFloat = 20
+    var tint: Color = .clear
+    var tintOpacity: CGFloat = 0
+
+    func body(content: Content) -> some View {
+        content
+            .background {
+                ZStack {
+                    // 1. blur/vibrancy base
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .fill(.ultraThinMaterial)
+
+                    // 2. color tint
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .fill(tint.opacity(tintOpacity))
+
+                    // 3. top specular — the signature glass highlight
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .fill(LinearGradient(
+                            stops: [
+                                .init(color: .white.opacity(0.52), location: 0.00),
+                                .init(color: .white.opacity(0.22), location: 0.18),
+                                .init(color: .white.opacity(0.00), location: 0.42),
+                            ],
+                            startPoint: .top, endPoint: .bottom
+                        ))
+
+                    // 4. bottom inner reflection — gives the pane depth
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .fill(LinearGradient(
+                            stops: [
+                                .init(color: .clear,               location: 0.78),
+                                .init(color: .white.opacity(0.07), location: 1.00),
+                            ],
+                            startPoint: .top, endPoint: .bottom
+                        ))
+
+                    // 5. gradient rim border (lit from top-left, shadowed on bottom)
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .strokeBorder(
+                            LinearGradient(
+                                stops: [
+                                    .init(color: .white.opacity(0.60), location: 0.00),
+                                    .init(color: .white.opacity(0.22), location: 0.30),
+                                    .init(color: .white.opacity(0.06), location: 0.65),
+                                    .init(color: .black.opacity(0.07), location: 1.00),
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 0.75
+                        )
+                }
+            }
+            // 6. soft drop shadow lifts the pane
+            .shadow(color: .black.opacity(0.13), radius: 5, x: 0, y: 2.5)
+    }
+}
+
+// ── Liquid Glass button style ──────────────────────────────────────────────
+private struct LiquidGlassButtonStyle: ButtonStyle {
+    var color: Color = .blue
+    var cornerRadius: CGFloat = 14
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity)
+            .frame(height: 36)
+            .background {
+                ZStack {
+                    // solid color base (gives button its identity)
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .fill(color)
+
+                    // ultra-thin vibrancy over the color
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .fill(.ultraThinMaterial.opacity(0.25))
+
+                    // top specular — same glass formula, more intense on buttons
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .fill(LinearGradient(
+                            stops: [
+                                .init(color: .white.opacity(0.48), location: 0.00),
+                                .init(color: .white.opacity(0.18), location: 0.22),
+                                .init(color: .white.opacity(0.00), location: 0.50),
+                            ],
+                            startPoint: .top, endPoint: .bottom
+                        ))
+
+                    // gradient rim
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .strokeBorder(
+                            LinearGradient(
+                                stops: [
+                                    .init(color: .white.opacity(0.55), location: 0.00),
+                                    .init(color: .white.opacity(0.15), location: 0.45),
+                                    .init(color: .black.opacity(0.06), location: 1.00),
+                                ],
+                                startPoint: .top, endPoint: .bottom
+                            ),
+                            lineWidth: 0.75
+                        )
+                }
+            }
+            .shadow(color: color.opacity(0.40), radius: 6, x: 0, y: 3)
+            // press feedback: subtle scale + dim
+            .scaleEffect(configuration.isPressed ? 0.96 : 1.00)
+            .brightness(configuration.isPressed ? -0.06 : 0)
+            .animation(.spring(duration: 0.12, bounce: 0.2), value: configuration.isPressed)
+    }
+}
+
+// ── ContentView ───────────────────────────────────────────────────────────
+
 struct ContentView: View {
     @EnvironmentObject var manager: AwakeManager
 
@@ -8,7 +132,7 @@ struct ContentView: View {
             titleRow
             statusCard
             toggleButton
-            footerRow
+            quitRow
         }
         .padding(14)
         .frame(width: 256)
@@ -22,7 +146,7 @@ struct ContentView: View {
             Text("Unslept")
                 .font(.system(size: 13, weight: .semibold))
             Spacer()
-            Text("v2.0")
+            Text("v1.1")
                 .font(.system(size: 11))
                 .foregroundStyle(.tertiary)
         }
@@ -41,116 +165,55 @@ struct ContentView: View {
                 .font(.system(size: 14, weight: .semibold))
                 .foregroundStyle(manager.isActive ? .primary : Color(nsColor: .secondaryLabelColor))
 
-            // always in layout — opacity hides when inactive → zero jitter
+            // always in layout, opacity hides it → zero layout shift
             Text(manager.isActive ? manager.durationString : "0с")
                 .font(.system(size: 11, design: .monospaced))
                 .foregroundStyle(.secondary)
                 .opacity(manager.isActive ? 1 : 0)
         }
         .frame(maxWidth: .infinity)
-        .frame(height: 116)          // fixed height → never shifts layout
-        .background { glassCard }
+        .frame(height: 116)
+        .modifier(LiquidGlassModifier(
+            cornerRadius: 20,
+            tint: .orange,
+            tintOpacity: manager.isActive ? 0.07 : 0
+        ))
     }
 
-    // liquid glass card background
-    private var glassCard: some View {
-        ZStack {
-            // 1. translucent base
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(.ultraThinMaterial)
-
-            // 2. warm tint when active
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(manager.isActive ? Color.orange.opacity(0.08) : Color.clear)
-
-            // 3. glass specular highlight — diagonal sheen from top-left
-            LinearGradient(
-                stops: [
-                    .init(color: .white.opacity(0.18), location: 0),
-                    .init(color: .white.opacity(0),    location: 0.55)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-
-            // 4. glass edge — gradient border, lighter on top
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .strokeBorder(
-                    LinearGradient(
-                        colors: [.white.opacity(0.30), .white.opacity(0.08)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
-                    lineWidth: 0.5
-                )
-        }
-    }
-
-    // ── Toggle — custom glass button, fixed size ───────────────────────────
+    // ── Toggle — liquid glass button ───────────────────────────────────────
 
     private var toggleButton: some View {
         Button {
             manager.isActive ? manager.deactivate() : manager.activate()
         } label: {
-            ZStack {
-                // button fill
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(manager.isActive
-                          ? Color(red: 0.82, green: 0.22, blue: 0.22).opacity(0.88)
-                          : Color(red: 0.18, green: 0.50, blue: 0.95).opacity(0.88))
-
-                // button glass sheen
-                LinearGradient(
-                    colors: [.white.opacity(0.18), .clear],
-                    startPoint: .top,
-                    endPoint: .center
-                )
-                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-
-                // button border
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .strokeBorder(.white.opacity(0.20), lineWidth: 0.5)
-
-                // label
-                HStack(spacing: 6) {
-                    Image(systemName: manager.isActive ? "stop.circle.fill" : "play.circle.fill")
-                        .font(.system(size: 13))
-                    Text(manager.isActive ? "Выключить" : "Включить ")
-                        .font(.system(size: 13, weight: .medium))
-                }
-                .foregroundStyle(.white)
+            HStack(spacing: 6) {
+                Image(systemName: manager.isActive ? "stop.circle.fill" : "play.circle.fill")
+                    .font(.system(size: 13, weight: .medium))
+                Text(manager.isActive ? "Выключить" : "Включить ")
+                    .font(.system(size: 13, weight: .medium))
             }
-            .frame(maxWidth: .infinity)
-            .frame(height: 36)
         }
-        .buttonStyle(.plain)
-        .transaction { t in t.animation = nil }  // no bounce on button itself
+        .buttonStyle(LiquidGlassButtonStyle(
+            color: manager.isActive
+                ? Color(red: 0.80, green: 0.18, blue: 0.18)
+                : Color(red: 0.16, green: 0.46, blue: 0.92)
+        ))
     }
 
-    // ── Footer — always rendered ───────────────────────────────────────────
+    // ── Quit ──────────────────────────────────────────────────────────────
 
-    private var footerRow: some View {
+    private var quitRow: some View {
         HStack {
-            HStack(spacing: 3) {
-                Image(systemName: "bolt.fill")
-                    .font(.system(size: 9))
-                Text("Лучше на зарядке")
-                    .font(.system(size: 10))
-            }
-            .foregroundStyle(.orange.opacity(0.85))
-            .opacity(manager.isActive ? 1 : 0)
-
             Spacer()
-
             Button("Выйти") {
                 manager.deactivate()
                 NSApplication.shared.terminate(nil)
             }
             .buttonStyle(.plain)
             .font(.system(size: 11))
-            .foregroundStyle(.secondary)
+            .foregroundStyle(.tertiary)
+            Spacer()
         }
-        .frame(height: 16)           // fixed footer → no shift
+        .frame(height: 14)
     }
 }
