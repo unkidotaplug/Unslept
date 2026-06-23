@@ -13,6 +13,8 @@
     <img src="https://img.shields.io/badge/deps-none-brightgreen" alt="no deps">
     <img src="https://img.shields.io/badge/version-1.2.1-blueviolet" alt="version">
   </p>
+
+  <img src="assets/screenshot.png" width="300" alt="Unslept menu bar popover">
 </div>
 
 ---
