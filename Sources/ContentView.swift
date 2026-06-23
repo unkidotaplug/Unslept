@@ -68,57 +68,71 @@ private struct LiquidGlassModifier: ViewModifier {
     }
 }
 
-// ── Liquid Glass button style ──────────────────────────────────────────────
-private struct LiquidGlassButtonStyle: ButtonStyle {
-    var color: Color = .blue
-    var cornerRadius: CGFloat = 14
+// ── Midnight Liquid Glass button (Apple Tahoe / 21st.dev style) ────────────
+// A glossy capsule in MacBook Air "Midnight" tone. Glass is built from layers:
+//   1. midnight vertical gradient base (catches light at top, deep at bottom)
+//   2. top specular gloss — the bright reflection across the upper third
+//   3. dual rim: bright top edge + faint bottom refraction, dark sides
+//   4. floating drop shadow (+ warm glow when active)
+private struct MidnightGlassButtonStyle: ButtonStyle {
+    var active: Bool = false
+
+    // MacBook Air "Midnight" — deep blue-black
+    private let top    = Color(red: 0.17, green: 0.20, blue: 0.27)   // #2B3345
+    private let bottom = Color(red: 0.075, green: 0.088, blue: 0.13) // #131722
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .foregroundStyle(.white)
             .frame(maxWidth: .infinity)
-            .frame(height: 36)
+            .frame(height: 50)
             .background {
                 ZStack {
-                    // solid color base (gives button its identity)
-                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                        .fill(color)
-
-                    // ultra-thin vibrancy over the color
-                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                        .fill(.ultraThinMaterial.opacity(0.25))
-
-                    // top specular — same glass formula, more intense on buttons
-                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    // 1. midnight base
+                    Capsule(style: .continuous)
                         .fill(LinearGradient(
-                            stops: [
-                                .init(color: .white.opacity(0.48), location: 0.00),
-                                .init(color: .white.opacity(0.18), location: 0.22),
-                                .init(color: .white.opacity(0.00), location: 0.50),
-                            ],
+                            colors: [top, bottom],
                             startPoint: .top, endPoint: .bottom
                         ))
 
-                    // gradient rim
-                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    // 2. top specular gloss
+                    Capsule(style: .continuous)
+                        .fill(LinearGradient(
+                            stops: [
+                                .init(color: .white.opacity(0.28), location: 0.00),
+                                .init(color: .white.opacity(0.08), location: 0.30),
+                                .init(color: .white.opacity(0.00), location: 0.55),
+                            ],
+                            startPoint: .top, endPoint: .bottom
+                        ))
+                        .blendMode(.plusLighter)
+
+                    // 3. dual rim — bright top, faint bottom refraction, dark sides
+                    Capsule(style: .continuous)
                         .strokeBorder(
                             LinearGradient(
                                 stops: [
-                                    .init(color: .white.opacity(0.55), location: 0.00),
-                                    .init(color: .white.opacity(0.15), location: 0.45),
-                                    .init(color: .black.opacity(0.06), location: 1.00),
+                                    .init(color: .white.opacity(0.60), location: 0.00),
+                                    .init(color: .white.opacity(0.10), location: 0.35),
+                                    .init(color: .black.opacity(0.18), location: 0.72),
+                                    .init(color: .white.opacity(0.22), location: 1.00),
                                 ],
                                 startPoint: .top, endPoint: .bottom
                             ),
-                            lineWidth: 0.75
+                            lineWidth: 0.9
                         )
                 }
             }
-            .shadow(color: color.opacity(0.40), radius: 6, x: 0, y: 3)
-            // press feedback: subtle scale + dim
-            .scaleEffect(configuration.isPressed ? 0.96 : 1.00)
-            .brightness(configuration.isPressed ? -0.06 : 0)
-            .animation(.spring(duration: 0.12, bounce: 0.2), value: configuration.isPressed)
+            // 4. floating shadow + warm glow when active
+            .shadow(color: .black.opacity(0.50), radius: 13, x: 0, y: 7)
+            .shadow(color: .black.opacity(0.30), radius: 3,  x: 0, y: 1)
+            .shadow(color: active ? Color.orange.opacity(0.38) : .clear,
+                    radius: 11, x: 0, y: 3)
+            // press feedback
+            .scaleEffect(configuration.isPressed ? 0.965 : 1.00)
+            .brightness(configuration.isPressed ? -0.05 : 0)
+            .animation(.spring(duration: 0.14, bounce: 0.22), value: configuration.isPressed)
+            .animation(.easeInOut(duration: 0.25), value: active)
     }
 }
 
@@ -186,18 +200,14 @@ struct ContentView: View {
         Button {
             manager.isActive ? manager.deactivate() : manager.activate()
         } label: {
-            HStack(spacing: 6) {
-                Image(systemName: manager.isActive ? "stop.circle.fill" : "play.circle.fill")
-                    .font(.system(size: 13, weight: .medium))
-                Text(manager.isActive ? "Выключить" : "Включить ")
-                    .font(.system(size: 13, weight: .medium))
+            HStack(spacing: 7) {
+                Image(systemName: manager.isActive ? "stop.fill" : "play.fill")
+                    .font(.system(size: 12, weight: .semibold))
+                Text(manager.isActive ? "Выключить" : "Включить")
+                    .font(.system(size: 14, weight: .semibold))
             }
         }
-        .buttonStyle(LiquidGlassButtonStyle(
-            color: manager.isActive
-                ? Color(red: 0.80, green: 0.18, blue: 0.18)
-                : Color(red: 0.16, green: 0.46, blue: 0.92)
-        ))
+        .buttonStyle(MidnightGlassButtonStyle(active: manager.isActive))
     }
 
     // ── Quit ──────────────────────────────────────────────────────────────
