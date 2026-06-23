@@ -83,45 +83,45 @@ private struct GlassButtonStyle: ButtonStyle {
             .frame(height: 50)
             .background {
                 ZStack {
-                    // 1. frosted glass base
+                    // 1. barely-there glass body — max transparency, just enough
+                    //    to catch light. Background shows straight through.
                     Capsule(style: .continuous)
-                        .fill(.ultraThinMaterial)
+                        .fill(LinearGradient(
+                            colors: [.white.opacity(0.10), .white.opacity(0.02)],
+                            startPoint: .top, endPoint: .bottom
+                        ))
 
-                    // 2. white film for the bright clear-glass tone
-                    Capsule(style: .continuous)
-                        .fill(Color.white.opacity(0.06))
-
-                    // 3. top specular gloss
+                    // 2. top specular gloss — the glass reflection
                     Capsule(style: .continuous)
                         .fill(LinearGradient(
                             stops: [
-                                .init(color: .white.opacity(0.35), location: 0.00),
-                                .init(color: .white.opacity(0.08), location: 0.30),
+                                .init(color: .white.opacity(0.30), location: 0.00),
+                                .init(color: .white.opacity(0.06), location: 0.30),
                                 .init(color: .white.opacity(0.00), location: 0.55),
                             ],
                             startPoint: .top, endPoint: .bottom
                         ))
                         .blendMode(.plusLighter)
 
-                    // 4. dual rim — bright top, faint bottom refraction, dark sides
+                    // 3. dual rim — draws the glass edge on any background
                     Capsule(style: .continuous)
                         .strokeBorder(
                             LinearGradient(
                                 stops: [
-                                    .init(color: .white.opacity(0.70), location: 0.00),
-                                    .init(color: .white.opacity(0.12), location: 0.40),
-                                    .init(color: .black.opacity(0.10), location: 0.72),
-                                    .init(color: .white.opacity(0.25), location: 1.00),
+                                    .init(color: .white.opacity(0.65), location: 0.00),
+                                    .init(color: .white.opacity(0.10), location: 0.38),
+                                    .init(color: .black.opacity(0.12), location: 0.72),
+                                    .init(color: .white.opacity(0.22), location: 1.00),
                                 ],
                                 startPoint: .top, endPoint: .bottom
                             ),
-                            lineWidth: 0.9
+                            lineWidth: 1.0
                         )
                 }
             }
-            // 5. soft floating shadow (neutral, no colour)
-            .shadow(color: .black.opacity(0.18), radius: 10, x: 0, y: 5)
-            .shadow(color: .black.opacity(0.10), radius: 2,  x: 0, y: 1)
+            // 4. soft floating shadow — keeps the clear capsule readable
+            .shadow(color: .black.opacity(0.22), radius: 11, x: 0, y: 6)
+            .shadow(color: .black.opacity(0.12), radius: 2,  x: 0, y: 1)
             // press feedback
             .scaleEffect(configuration.isPressed ? 0.965 : 1.00)
             .brightness(configuration.isPressed ? -0.04 : 0)
@@ -141,8 +141,16 @@ struct ContentView: View {
             toggleButton
             quitRow
         }
-        .padding(14)
+        .padding(16)
         .frame(width: 256)
+        .background(
+            LinearGradient(
+                colors: [Color(red: 0.137, green: 0.145, blue: 0.224),   // #232539
+                         Color(red: 0.075, green: 0.080, blue: 0.122)],   // #13141F
+                startPoint: .top, endPoint: .bottom
+            )
+        )
+        .environment(\.colorScheme, .dark)   // midnight bg → light text + dark glass
         .animation(.easeInOut(duration: 0.25), value: manager.isActive)
     }
 
@@ -162,25 +170,25 @@ struct ContentView: View {
     // ── Status card — liquid glass ─────────────────────────────────────────
 
     private var statusCard: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 10) {
             Image(systemName: manager.isActive ? "cup.and.heat.waves.fill" : "moon.zzz.fill")
-                .font(.system(size: 30))
-                .frame(width: 40, height: 38)
-                .foregroundStyle(manager.isActive ? .primary : Color(nsColor: .secondaryLabelColor))
+                .font(.system(size: 34))
+                .frame(width: 44, height: 40)
+                .foregroundStyle(manager.isActive ? .primary : .secondary)
 
+            // plain text — not a button, no glass frame
             Text(manager.isActive ? "Мак не заснёт" : "Мак может спать")
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(manager.isActive ? .primary : Color(nsColor: .secondaryLabelColor))
+                .font(.system(size: 19, weight: .semibold))
+                .foregroundStyle(manager.isActive ? .primary : .secondary)
 
             // always in layout, opacity hides it → zero layout shift
             Text(manager.isActive ? manager.durationString : "0с")
-                .font(.system(size: 11, design: .monospaced))
+                .font(.system(size: 12, design: .monospaced))
                 .foregroundStyle(.secondary)
                 .opacity(manager.isActive ? 1 : 0)
         }
         .frame(maxWidth: .infinity)
-        .frame(height: 116)
-        .modifier(LiquidGlassModifier(cornerRadius: 20))
+        .frame(height: 100)
     }
 
     // ── Toggle — liquid glass button ───────────────────────────────────────
