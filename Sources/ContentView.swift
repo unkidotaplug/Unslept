@@ -68,38 +68,34 @@ private struct LiquidGlassModifier: ViewModifier {
     }
 }
 
-// ── Midnight Liquid Glass button (Apple Tahoe / 21st.dev style) ────────────
-// A glossy capsule in MacBook Air "Midnight" tone. Glass is built from layers:
-//   1. midnight vertical gradient base (catches light at top, deep at bottom)
-//   2. top specular gloss — the bright reflection across the upper third
-//   3. dual rim: bright top edge + faint bottom refraction, dark sides
-//   4. floating drop shadow (+ warm glow when active)
-private struct MidnightGlassButtonStyle: ButtonStyle {
-    var active: Bool = false
-
-    // MacBook Air "Midnight" — deep blue-black
-    private let top    = Color(red: 0.17, green: 0.20, blue: 0.27)   // #2B3345
-    private let bottom = Color(red: 0.075, green: 0.088, blue: 0.13) // #131722
-
+// ── Liquid Glass button — colourless, clear glass (21st.dev screenshot) ────
+// A translucent frosted capsule. No tint, no colour — pure glass:
+//   1. ultraThinMaterial base (blurs whatever is behind it)
+//   2. faint white film → the bright frosted look from the reference
+//   3. top specular gloss across the upper third
+//   4. dual rim bevel: bright top edge + bottom refraction, dark sides
+//   5. soft floating drop shadow
+private struct GlassButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .foregroundStyle(.white)
+            .foregroundStyle(.primary)
             .frame(maxWidth: .infinity)
             .frame(height: 50)
             .background {
                 ZStack {
-                    // 1. midnight base
+                    // 1. frosted glass base
                     Capsule(style: .continuous)
-                        .fill(LinearGradient(
-                            colors: [top, bottom],
-                            startPoint: .top, endPoint: .bottom
-                        ))
+                        .fill(.ultraThinMaterial)
 
-                    // 2. top specular gloss
+                    // 2. white film for the bright clear-glass tone
+                    Capsule(style: .continuous)
+                        .fill(Color.white.opacity(0.06))
+
+                    // 3. top specular gloss
                     Capsule(style: .continuous)
                         .fill(LinearGradient(
                             stops: [
-                                .init(color: .white.opacity(0.28), location: 0.00),
+                                .init(color: .white.opacity(0.35), location: 0.00),
                                 .init(color: .white.opacity(0.08), location: 0.30),
                                 .init(color: .white.opacity(0.00), location: 0.55),
                             ],
@@ -107,15 +103,15 @@ private struct MidnightGlassButtonStyle: ButtonStyle {
                         ))
                         .blendMode(.plusLighter)
 
-                    // 3. dual rim — bright top, faint bottom refraction, dark sides
+                    // 4. dual rim — bright top, faint bottom refraction, dark sides
                     Capsule(style: .continuous)
                         .strokeBorder(
                             LinearGradient(
                                 stops: [
-                                    .init(color: .white.opacity(0.60), location: 0.00),
-                                    .init(color: .white.opacity(0.10), location: 0.35),
-                                    .init(color: .black.opacity(0.18), location: 0.72),
-                                    .init(color: .white.opacity(0.22), location: 1.00),
+                                    .init(color: .white.opacity(0.70), location: 0.00),
+                                    .init(color: .white.opacity(0.12), location: 0.40),
+                                    .init(color: .black.opacity(0.10), location: 0.72),
+                                    .init(color: .white.opacity(0.25), location: 1.00),
                                 ],
                                 startPoint: .top, endPoint: .bottom
                             ),
@@ -123,16 +119,13 @@ private struct MidnightGlassButtonStyle: ButtonStyle {
                         )
                 }
             }
-            // 4. floating shadow + warm glow when active
-            .shadow(color: .black.opacity(0.50), radius: 13, x: 0, y: 7)
-            .shadow(color: .black.opacity(0.30), radius: 3,  x: 0, y: 1)
-            .shadow(color: active ? Color.orange.opacity(0.38) : .clear,
-                    radius: 11, x: 0, y: 3)
+            // 5. soft floating shadow (neutral, no colour)
+            .shadow(color: .black.opacity(0.18), radius: 10, x: 0, y: 5)
+            .shadow(color: .black.opacity(0.10), radius: 2,  x: 0, y: 1)
             // press feedback
             .scaleEffect(configuration.isPressed ? 0.965 : 1.00)
-            .brightness(configuration.isPressed ? -0.05 : 0)
+            .brightness(configuration.isPressed ? -0.04 : 0)
             .animation(.spring(duration: 0.14, bounce: 0.22), value: configuration.isPressed)
-            .animation(.easeInOut(duration: 0.25), value: active)
     }
 }
 
@@ -173,7 +166,7 @@ struct ContentView: View {
             Image(systemName: manager.isActive ? "cup.and.heat.waves.fill" : "moon.zzz.fill")
                 .font(.system(size: 30))
                 .frame(width: 40, height: 38)
-                .foregroundStyle(manager.isActive ? .orange : Color(nsColor: .secondaryLabelColor))
+                .foregroundStyle(manager.isActive ? .primary : Color(nsColor: .secondaryLabelColor))
 
             Text(manager.isActive ? "Мак не заснёт" : "Мак может спать")
                 .font(.system(size: 14, weight: .semibold))
@@ -187,11 +180,7 @@ struct ContentView: View {
         }
         .frame(maxWidth: .infinity)
         .frame(height: 116)
-        .modifier(LiquidGlassModifier(
-            cornerRadius: 20,
-            tint: .orange,
-            tintOpacity: manager.isActive ? 0.07 : 0
-        ))
+        .modifier(LiquidGlassModifier(cornerRadius: 20))
     }
 
     // ── Toggle — liquid glass button ───────────────────────────────────────
@@ -207,7 +196,7 @@ struct ContentView: View {
                     .font(.system(size: 14, weight: .semibold))
             }
         }
-        .buttonStyle(MidnightGlassButtonStyle(active: manager.isActive))
+        .buttonStyle(GlassButtonStyle())
     }
 
     // ── Quit ──────────────────────────────────────────────────────────────
