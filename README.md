@@ -1,10 +1,10 @@
 <div align="center">
   <img src="assets/icon.png" width="120" alt="Unslept">
   <h1>Unslept</h1>
-  <p><b>Не дай Маку уснуть, пока нейросеть пишет код — даже с закрытой крышкой.</b></p>
+  <p><b>Keep your Mac awake while AI writes code — even with the lid closed.</b></p>
 
   <p>
-    <a href="https://github.com/unkidotaplug/Unslept/releases/latest/download/Unslept.dmg"><b>⬇️ Скачать Unslept.dmg</b></a>
+    <a href="https://github.com/unkidotaplug/Unslept/releases/latest/download/Unslept.dmg"><b>⬇️ Download Unslept.dmg</b></a>
   </p>
 
   <p>
@@ -17,62 +17,62 @@
 
 ---
 
-## Что это
+## What is this
 
-В 2026-м долгие задачи у нейросетей — норма: рефакторинг на часы, генерация целого проекта, агенты, которые работают без остановки. Прерывать нельзя, а сидеть рядом с ноутом сутками — тоже. Стоит закрыть крышку MacBook — и macOS усыпляет систему, процесс встаёт.
+In 2026, long-running AI tasks are the norm: hours-long refactors, generating whole projects, agents that work nonstop. You can't interrupt them — and you can't sit next to your laptop around the clock either. Close the MacBook lid and macOS puts the system to sleep, so the process stalls.
 
-**Unslept** живёт в строке меню и не даёт Маку заснуть — **даже когда крышка закрыта**. Включил, ушёл по делам, нейронка спокойно дорабатывает.
+**Unslept** lives in the menu bar and keeps your Mac awake — **even with the lid closed**. Turn it on, walk away, and let the AI finish.
 
-## Возможности
+## Features
 
-- 🔒 **Не спит с закрытой крышкой** — главное отличие от `caffeinate` и большинства аналогов
-- 🌙 **Иконка в строке меню** — замок меняется при включении/выключении
-- ⏱ **Auto-off** — Mac сам уснёт через 1 / 2 / 4 / 8 часов
-- ⚡ **Автозапуск** при входе в систему
-- 🪶 **Без зависимостей** — нативный Swift, ~600 КБ, ничего доставлять не нужно
+- 🔒 **Stays awake with the lid closed** — the key difference from `caffeinate` and most alternatives
+- 🌙 **Menu bar icon** — the lock toggles between on and off
+- ⏱ **Auto-off** — the Mac sleeps on its own after 1 / 2 / 4 / 8 hours
+- ⚡ **Launch at login**
+- 🪶 **No dependencies** — native Swift, ~600 KB, nothing to install
 
-## Установка
+## Installation
 
-1. **[Скачай Unslept.dmg](https://github.com/unkidotaplug/Unslept/releases/latest/download/Unslept.dmg)** и открой.
-2. Перетащи **Unslept** в папку **Applications** (ярлык лежит в том же окне).
-3. Первый запуск: **правый клик по Unslept → «Открыть» → «Открыть»**.
-   _Приложение без платной подписи Apple, поэтому система переспрашивает — только при первом запуске._
+1. **[Download Unslept.dmg](https://github.com/unkidotaplug/Unslept/releases/latest/download/Unslept.dmg)** and open it.
+2. Drag **Unslept** into your **Applications** folder (the shortcut is in the same window).
+3. First launch: **right-click Unslept → “Open” → “Open”**.
+   _The app isn't signed with a paid Apple certificate, so macOS asks for confirmation — only on the first launch._
 
-   Если macOS пишет, что приложение «повреждено», выполни в Терминале:
+   If macOS says the app is “damaged”, run this in Terminal:
    ```bash
    xattr -dr com.apple.quarantine /Applications/Unslept.app
    ```
-4. В строке меню сверху появится иконка замка — это Unslept.
+4. A lock icon appears in the menu bar — that's Unslept.
 
-## Использование
+## Usage
 
-| Действие | Что делает |
+| Action | What it does |
 |---|---|
-| **Turn on** | Mac не уснёт, в том числе с закрытой крышкой |
-| **Turn off** / **Quit** | Возвращает обычный режим сна |
-| **Auto-off** | Автовыключение по таймеру (1–8 часов) |
-| **Launch at login** | Запуск Unslept при входе в систему |
+| **Turn on** | The Mac won't sleep, including with the lid closed |
+| **Turn off** / **Quit** | Restores normal sleep behavior |
+| **Auto-off** | Auto-disables on a timer (1–8 hours) |
+| **Launch at login** | Starts Unslept when you log in |
 
-> 🔑 При включении и выключении система спросит **пароль администратора**. Это необходимо: без прав админа нельзя изменить системную настройку сна, и закрытая крышка усыпит Mac.
+> 🔑 On enable and disable, the system asks for your **admin password**. This is required: without admin rights the sleep setting can't be changed, and a closed lid would put the Mac to sleep.
 
-> ⚠️ Выключай через **Turn off** или **Quit**. Если завершить процесс принудительно, Mac не будет засыпать до перезагрузки. Аварийно вернуть сон: `sudo pmset disablesleep 0`.
+> ⚠️ Always turn off via **Turn off** or **Quit**. If you force-quit the process, the Mac won't sleep until reboot. Emergency reset: `sudo pmset disablesleep 0`.
 
-## Как это работает
+## How it works
 
-Обычные power-assertions (`caffeinate -s`, `IOPMAssertion`) блокируют только *простойный* сон. При закрытии крышки macOS усыпляет Mac **независимо** от них — это отдельный механизм (clamshell sleep). Единственный способ удержать систему с закрытой крышкой без внешнего монитора — системный флаг `pmset disablesleep 1`, который Unslept ставит при включении (с правами админа) и снимает при выключении.
+Standard power assertions (`caffeinate -s`, `IOPMAssertion`) only block *idle* sleep. When the lid closes, macOS sleeps **regardless** of them — that's a separate mechanism (clamshell sleep). The only way to keep the system awake with the lid closed and no external display is the system flag `pmset disablesleep 1`, which Unslept sets on enable (with admin rights) and clears on disable.
 
-## Сборка из исходников
+## Build from source
 
 ```bash
 git clone https://github.com/unkidotaplug/Unslept.git
 cd Unslept
-bash build.sh        # компиляция + сборка .app (ad-hoc подпись)
+bash build.sh        # compile + assemble the .app (ad-hoc signed)
 open build/Unslept.app
-bash dist.sh         # (опционально) собрать .dmg для раздачи
+bash dist.sh         # (optional) build the .dmg for distribution
 ```
 
-Требования: macOS 13+, Xcode Command Line Tools (Swift 6).
+Requirements: macOS 13+, Xcode Command Line Tools (Swift 6).
 
 ---
 
-<div align="center"><sub>Сделано для вайбкодеров · 2026</sub></div>
+<div align="center"><sub>Made for vibe coders · 2026</sub></div>
