@@ -139,6 +139,7 @@ struct ContentView: View {
             titleRow
             statusCard
             toggleButton
+            settings
             quitRow
         }
         .padding(16)
@@ -153,7 +154,7 @@ struct ContentView: View {
             Text("Unslept")
                 .font(.system(size: 13, weight: .semibold))
             Spacer()
-            Text("v1.1")
+            Text("v1.2")
                 .font(.system(size: 11))
                 .foregroundStyle(.tertiary)
         }
@@ -174,7 +175,7 @@ struct ContentView: View {
                 .foregroundStyle(manager.isActive ? .primary : .secondary)
 
             // always in layout, opacity hides it → zero layout shift
-            Text(manager.isActive ? manager.durationString : "0s")
+            Text(manager.isActive ? manager.timerText : "0s")
                 .font(.system(size: 12, design: .monospaced))
                 .foregroundStyle(.secondary)
                 .opacity(manager.isActive ? 1 : 0)
@@ -197,6 +198,44 @@ struct ContentView: View {
             }
         }
         .buttonStyle(GlassButtonStyle())
+    }
+
+    // ── Settings ────────────────────────────────────────────────────────────
+
+    private var settings: some View {
+        VStack(spacing: 9) {
+            Divider().opacity(0.4)
+
+            HStack(spacing: 8) {
+                Image(systemName: "power").font(.system(size: 11)).foregroundStyle(.secondary)
+                Text("Launch at login").font(.system(size: 12))
+                Spacer()
+                Toggle("", isOn: Binding(
+                    get: { manager.launchAtLogin },
+                    set: { manager.setLaunchAtLogin($0) }
+                ))
+                .toggleStyle(.switch)
+                .labelsHidden()
+                .controlSize(.mini)
+            }
+
+            HStack(spacing: 8) {
+                Image(systemName: "timer").font(.system(size: 11)).foregroundStyle(.secondary)
+                Text("Auto-off").font(.system(size: 12))
+                Spacer()
+                Picker("", selection: $manager.autoOffMinutes) {
+                    Text("Off").tag(0)
+                    Text("1 hour").tag(60)
+                    Text("2 hours").tag(120)
+                    Text("4 hours").tag(240)
+                    Text("8 hours").tag(480)
+                }
+                .labelsHidden()
+                .pickerStyle(.menu)
+                .controlSize(.small)
+                .fixedSize()
+            }
+        }
     }
 
     // ── Quit ──────────────────────────────────────────────────────────────

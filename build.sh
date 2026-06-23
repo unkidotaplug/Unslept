@@ -3,7 +3,7 @@
 set -e
 
 APP_NAME="Unslept"
-VERSION="1.1.0"
+VERSION="1.2.0"
 BUNDLE_ID="com.unslept.app"
 MIN_OS="13.0"
 DIR="$(cd "$(dirname "$0")" && pwd)"
