@@ -73,6 +73,14 @@ bash dist.sh         # (optional) build the .dmg for distribution
 
 Requirements: macOS 13+, Xcode Command Line Tools (Swift 6).
 
+## License
+
+Unslept is licensed under the **GNU General Public License v3.0** — see [LICENSE](LICENSE).
+
+You're free to use, study, and modify the code. But any **distributed** derivative work must also be open-sourced under GPLv3 and **retain the original copyright/attribution**. You cannot take this code into a closed-source product.
+
+The name **“Unslept”** and its icon are project branding.
+
 ---
 
 <div align="center"><sub>Made for vibe coders · 2026</sub></div>

@@ -1,3 +1,15 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// Unslept — keep your Mac awake while AI codes, even with the lid closed.
+// Copyright (C) 2026 unkidotaplug
+//
+// This program is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by the Free
+// Software Foundation, either version 3 of the License, or (at your option)
+// any later version. Distributed WITHOUT ANY WARRANTY. See the GNU General
+// Public License <https://www.gnu.org/licenses/> for more details.
+//
+
 import Foundation
 import IOKit.pwr_mgt
 import ServiceManagement
