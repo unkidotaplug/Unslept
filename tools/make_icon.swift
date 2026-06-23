@@ -17,14 +17,10 @@ let clip = CGPath(roundedRect: rect, cornerWidth: radius, cornerHeight: radius, 
 ctx.addPath(clip)
 ctx.clip()
 
-// Blue gradient  #1B2333 → #0E1422  (top-left to bottom-right)
+// Solid base — user-picked colour  R12 G32 B40  (#0C2028)
 let cs = CGColorSpaceCreateDeviceRGB()
-let grad = CGGradient(colorsSpace: cs, colors: [
-    CGColor(red: 0x1B/255, green: 0x23/255, blue: 0x33/255, alpha: 1),
-    CGColor(red: 0x0E/255, green: 0x14/255, blue: 0x22/255, alpha: 1),
-] as CFArray, locations: [0, 1])!
-ctx.drawLinearGradient(grad, start: CGPoint(x: 0, y: size),
-                       end: CGPoint(x: size, y: 0), options: [])
+ctx.setFillColor(CGColor(red: 12/255, green: 32/255, blue: 40/255, alpha: 1))
+ctx.fill(rect)
 
 // soft top sheen
 let sheen = CGGradient(colorsSpace: cs, colors: [
@@ -37,7 +33,7 @@ ctx.drawLinearGradient(sheen, start: CGPoint(x: 0, y: size),
 // "UT" monogram
 let text = "UT"
 let para = NSMutableParagraphStyle(); para.alignment = .center
-let font = NSFont.systemFont(ofSize: size * 0.40, weight: .heavy)
+let font = NSFont.systemFont(ofSize: size * 0.56, weight: .heavy)
 let attrs: [NSAttributedString.Key: Any] = [
     .font: font,
     .foregroundColor: NSColor.white,

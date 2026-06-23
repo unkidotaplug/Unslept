@@ -13,7 +13,7 @@ final class AwakeManager: ObservableObject {
     // kIOPMAssertionTypePreventSystemSleep blocks system sleep
     // including lid-close on AC power — exactly what vibe coders need
     private let assertionType = kIOPMAssertionTypePreventSystemSleep as CFString
-    private let assertionReason = "VibeAwake: AI vibe-coding in progress" as CFString
+    private let assertionReason = "Unslept: keeping your Mac awake" as CFString
 
     func activate() {
         guard !isActive else { return }
@@ -51,8 +51,8 @@ final class AwakeManager: ObservableObject {
         let h = elapsedSeconds / 3600
         let m = (elapsedSeconds % 3600) / 60
         let s = elapsedSeconds % 60
-        if h > 0 { return String(format: "%dч %02dм %02dс", h, m, s) }
-        if m > 0 { return String(format: "%dм %02dс", m, s) }
-        return String(format: "%dс", s)
+        if h > 0 { return String(format: "%dh %02dm %02ds", h, m, s) }
+        if m > 0 { return String(format: "%dm %02ds", m, s) }
+        return String(format: "%ds", s)
     }
 }

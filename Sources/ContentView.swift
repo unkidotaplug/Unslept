@@ -169,12 +169,12 @@ struct ContentView: View {
                 .foregroundStyle(manager.isActive ? .primary : .secondary)
 
             // plain text — not a button, no glass frame
-            Text(manager.isActive ? "Мак не заснёт" : "Мак может спать")
+            Text(manager.isActive ? "Mac stays awake" : "Mac can sleep")
                 .font(.system(size: 19, weight: .semibold))
                 .foregroundStyle(manager.isActive ? .primary : .secondary)
 
             // always in layout, opacity hides it → zero layout shift
-            Text(manager.isActive ? manager.durationString : "0с")
+            Text(manager.isActive ? manager.durationString : "0s")
                 .font(.system(size: 12, design: .monospaced))
                 .foregroundStyle(.secondary)
                 .opacity(manager.isActive ? 1 : 0)
@@ -192,7 +192,7 @@ struct ContentView: View {
             HStack(spacing: 7) {
                 Image(systemName: manager.isActive ? "stop.fill" : "play.fill")
                     .font(.system(size: 12, weight: .semibold))
-                Text(manager.isActive ? "Выключить" : "Включить")
+                Text(manager.isActive ? "Turn off" : "Turn on")
                     .font(.system(size: 14, weight: .semibold))
             }
         }
@@ -204,7 +204,7 @@ struct ContentView: View {
     private var quitRow: some View {
         HStack {
             Spacer()
-            Button("Выйти") {
+            Button("Quit") {
                 manager.deactivate()
                 NSApplication.shared.terminate(nil)
             }
