@@ -6,3 +6,8 @@ build/
 
 # website отложен — не трекаем пока
 website/
+
+# icon generation intermediates (keep make_icon.swift + assets/Unslept.icns)
+tools/icon_1024.png
+tools/*.iconset/
+.venv/

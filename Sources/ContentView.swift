@@ -143,14 +143,6 @@ struct ContentView: View {
         }
         .padding(16)
         .frame(width: 256)
-        .background(
-            LinearGradient(
-                colors: [Color(red: 0.137, green: 0.145, blue: 0.224),   // #232539
-                         Color(red: 0.075, green: 0.080, blue: 0.122)],   // #13141F
-                startPoint: .top, endPoint: .bottom
-            )
-        )
-        .environment(\.colorScheme, .dark)   // midnight bg → light text + dark glass
         .animation(.easeInOut(duration: 0.25), value: manager.isActive)
     }
 

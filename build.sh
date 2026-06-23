@@ -25,6 +25,11 @@ mkdir -p "$MACOS_DIR" "$CONTENTS/Resources"
 cp "$BINARY" "$MACOS_DIR/$APP_NAME"
 chmod +x "$MACOS_DIR/$APP_NAME"
 
+# ── Resources: app icon + menu-bar icons ───────────────────────────────────
+cp "$DIR/assets/Unslept.icns"        "$CONTENTS/Resources/"
+cp "$DIR/assets/menubar/bar_on.png"  "$CONTENTS/Resources/"
+cp "$DIR/assets/menubar/bar_off.png" "$CONTENTS/Resources/"
+
 # ── Info.plist ─────────────────────────────────────────────────────────────
 cat > "$CONTENTS/Info.plist" << PLIST
 <?xml version="1.0" encoding="UTF-8"?>
@@ -45,6 +50,8 @@ cat > "$CONTENTS/Info.plist" << PLIST
     <string>${VERSION}</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
+    <key>CFBundleIconFile</key>
+    <string>Unslept</string>
     <key>LSUIElement</key>
     <true/>
     <key>LSMinimumSystemVersion</key>
@@ -54,7 +61,7 @@ cat > "$CONTENTS/Info.plist" << PLIST
     <key>NSPrincipalClass</key>
     <string>NSApplication</string>
     <key>NSHumanReadableCopyright</key>
-    <string>© 2026 VibeAwake</string>
+    <string>© 2026 Unslept</string>
 </dict>
 </plist>
 PLIST
