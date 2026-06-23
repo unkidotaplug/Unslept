@@ -2,9 +2,9 @@
 # Builds VibeAwake and packages it into a proper .app bundle.
 set -e
 
-APP_NAME="VibeAwake"
-VERSION="1.0.0"
-BUNDLE_ID="com.vibeawake.app"
+APP_NAME="Unslept"
+VERSION="2.0.0"
+BUNDLE_ID="com.unslept.app"
 MIN_OS="13.0"
 DIR="$(cd "$(dirname "$0")" && pwd)"
 

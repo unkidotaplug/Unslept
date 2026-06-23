@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct VibeAwakeApp: App {
+struct UnsleptApp: App {
     @StateObject private var manager = AwakeManager()
 
     var body: some Scene {
@@ -9,13 +9,9 @@ struct VibeAwakeApp: App {
             ContentView()
                 .environmentObject(manager)
         } label: {
-            Image(
-                systemName: manager.isActive
-                    ? "cup.and.heat.waves.fill"
-                    : "moon.zzz.fill"
-            )
-            .foregroundStyle(manager.isActive ? .orange : .primary)
-            .symbolRenderingMode(.hierarchical)
+            Image(systemName: manager.isActive ? "sparkles" : "moon.fill")
+                .symbolRenderingMode(.hierarchical)
+                .foregroundStyle(manager.isActive ? .orange : .primary)
         }
         .menuBarExtraStyle(.window)
     }
