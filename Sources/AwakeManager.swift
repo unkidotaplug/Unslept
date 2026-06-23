@@ -19,8 +19,11 @@ final class AwakeManager: ObservableObject {
     private var timerCancellable: AnyCancellable?
     private var startDate: Date?
 
-    // kIOPMAssertionTypePreventSystemSleep blocks system sleep
-    // including lid-close on AC power — exactly what vibe coders need.
+    // NOTE: this assertion only blocks *idle* sleep. It does NOT stop sleep
+    // when the lid is physically closed (clamshell sleep) — macOS handles that
+    // separately and ignores assertions. For closed-lid we use `pmset
+    // disablesleep` below, which is the only mechanism that works without an
+    // external display (and requires admin rights).
     private let assertionType = kIOPMAssertionTypePreventSystemSleep as CFString
     private let assertionReason = "Unslept: keeping your Mac awake" as CFString
 
@@ -47,10 +50,14 @@ final class AwakeManager: ObservableObject {
         timerCancellable = Timer.publish(every: 1, on: .main, in: .common)
             .autoconnect()
             .sink { [weak self] _ in self?.tick() }
+
+        // the part that actually keeps the Mac awake with the lid closed
+        setDisableSleep(true)
     }
 
     func deactivate() {
         guard isActive else { return }
+        setDisableSleep(false)   // re-allow lid-close sleep
         timerCancellable?.cancel()
         timerCancellable = nil
         IOPMAssertionRelease(assertionID)
@@ -58,6 +65,33 @@ final class AwakeManager: ObservableObject {
         isActive = false
         startDate = nil
         elapsedSeconds = 0
+    }
+
+    // ── Closed-lid sleep (pmset disablesleep, needs admin) ──────────────────
+
+    /// Toggles the system-wide sleep lock that also covers lid-close.
+    /// Runs `pmset disablesleep <0|1>` via osascript so macOS shows its native
+    /// admin-password prompt. This is the only supported way to keep a Mac
+    /// awake with the lid shut and no external display attached.
+    private func setDisableSleep(_ on: Bool) {
+        let value = on ? "1" : "0"
+        DispatchQueue.global(qos: .userInitiated).async {
+            let proc = Process()
+            proc.launchPath = "/usr/bin/osascript"
+            proc.arguments = [
+                "-e",
+                "do shell script \"/usr/bin/pmset disablesleep \(value)\" with administrator privileges",
+            ]
+            do {
+                try proc.run()
+                proc.waitUntilExit()
+                if proc.terminationStatus != 0 {
+                    NSLog("Unslept: pmset disablesleep \(value) exited \(proc.terminationStatus)")
+                }
+            } catch {
+                NSLog("Unslept: failed to run pmset: \(error)")
+            }
+        }
     }
 
     private func tick() {

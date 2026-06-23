@@ -154,7 +154,7 @@ struct ContentView: View {
             Text("Unslept")
                 .font(.system(size: 13, weight: .semibold))
             Spacer()
-            Text("v1.2")
+            Text("v1.2.1")
                 .font(.system(size: 11))
                 .foregroundStyle(.tertiary)
         }
