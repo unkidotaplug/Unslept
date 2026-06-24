@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unslept — Mac не уснёт, пока ИИ пишет код</title>
+<meta name="description" content="Нативная утилита для macOS: не даёт Маку уснуть даже с закрытой крышкой, пока работает нейросеть.">
+<style>
+  :root{
+    --bg-deep:#060f14;
+    --bg-mid:#0c2028;
+    --text:#eaf1f3;
+    --text-dim:rgba(225,235,238,.62);
+    --text-faint:rgba(225,235,238,.40);
+    --glass:rgba(255,255,255,.055);
+    --glass-brd:rgba(255,255,255,.14);
+    --accent:#5fd9e8;
+    --spring:cubic-bezier(.34,1.56,.64,1);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif;
+    color:var(--text);
+    min-height:100dvh;
+    background:radial-gradient(135% 115% at 50% 0%,#123642 0%,var(--bg-mid) 40%,var(--bg-deep) 100%);
+    overflow-x:hidden;-webkit-font-smoothing:antialiased;
+  }
+  /* soft, muted brand-tone aurora — no neon */
+  .aura{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+  .aura span{position:absolute;border-radius:50%;filter:blur(90px);opacity:.5}
+  .a1{width:48vmax;height:48vmax;background:radial-gradient(circle,#1d5a6e,transparent 70%);top:-14%;left:-10%;animation:float1 24s ease-in-out infinite}
+  .a2{width:40vmax;height:40vmax;background:radial-gradient(circle,#16305a,transparent 70%);top:35%;right:-12%;animation:float2 30s ease-in-out infinite}
+  .a3{width:34vmax;height:34vmax;background:radial-gradient(circle,#10303a,transparent 72%);bottom:-16%;left:30%;animation:float1 27s ease-in-out infinite reverse}
+  @keyframes float1{0%,100%{transform:translate(0,0)}50%{transform:translate(6vmax,5vmax)}}
+  @keyframes float2{0%,100%{transform:translate(0,0)}50%{transform:translate(-7vmax,4vmax)}}
+  .vignette{position:fixed;inset:0;z-index:1;pointer-events:none;
+    background:radial-gradient(120% 90% at 50% 35%,transparent 45%,rgba(4,9,12,.6) 100%)}
+
+  main{position:relative;z-index:2;max-width:920px;margin:0 auto;padding:64px 24px 80px;
+    display:flex;flex-direction:column;align-items:center;text-align:center}
+
+  /* hero */
+  .icon{width:104px;height:104px;border-radius:24px;box-shadow:0 20px 50px -12px rgba(0,0,0,.7);margin-bottom:26px}
+  h1{font-size:clamp(38px,7vw,62px);font-weight:600;letter-spacing:-1.5px;line-height:1.02}
+  h1 em{font-style:normal;background:linear-gradient(100deg,#7fe3ef,#4aa6c4 70%);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .tagline{margin-top:18px;font-size:clamp(16px,2.4vw,20px);color:var(--text-dim);max-width:540px;line-height:1.55}
+
+  /* buttons */
+  .cta{display:flex;gap:14px;margin-top:34px;flex-wrap:wrap;justify-content:center}
+  .btn{display:inline-flex;align-items:center;gap:10px;height:54px;padding:0 26px;border-radius:15px;
+    font-size:16px;font-weight:600;text-decoration:none;cursor:pointer;border:none;
+    transition:transform .35s var(--spring),box-shadow .3s ease,background .25s ease}
+  .btn svg{width:20px;height:20px}
+  .btn-primary{color:#06181d;background:linear-gradient(135deg,#cdeef3,#7fd8e6 55%,#9fcdf0);
+    box-shadow:0 12px 34px -8px rgba(95,217,232,.55),inset 0 1px 1px rgba(255,255,255,.7)}
+  .btn-primary:hover{transform:translateY(-2px) scale(1.025);box-shadow:0 18px 44px -8px rgba(95,217,232,.7),inset 0 1px 1px rgba(255,255,255,.8)}
+  .btn-ghost{color:var(--text);background:var(--glass);border:1px solid var(--glass-brd);
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+  .btn-ghost:hover{transform:translateY(-2px) scale(1.025);background:rgba(255,255,255,.1)}
+  .meta{margin-top:16px;font-size:13px;color:var(--text-faint);font-variant-numeric:tabular-nums}
+
+  /* screenshot */
+  .shot{margin-top:64px;width:min(340px,80vw);border-radius:22px;
+    box-shadow:0 40px 90px -24px rgba(0,0,0,.85),0 0 0 1px rgba(255,255,255,.06);
+    will-change:transform}
+
+  /* description */
+  .lead{margin-top:72px;max-width:620px;font-size:17px;line-height:1.7;color:var(--text-dim)}
+  .lead b{color:var(--text);font-weight:600}
+
+  /* features */
+  .features{margin-top:54px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;width:100%;max-width:760px}
+  .feat{padding:24px 18px;border-radius:18px;background:var(--glass);border:1px solid rgba(255,255,255,.08);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);text-align:left}
+  .feat .ico{font-size:24px;margin-bottom:12px}
+  .feat h3{font-size:15px;font-weight:600;margin-bottom:6px}
+  .feat p{font-size:13px;line-height:1.5;color:var(--text-dim)}
+
+  footer{position:relative;z-index:2;text-align:center;padding:36px 24px 48px;color:var(--text-faint);font-size:13px}
+  footer a{color:var(--text-dim);text-decoration:none}
+  footer a:hover{color:var(--text)}
+
+  @media (max-width:640px){.features{grid-template-columns:1fr}}
+  @media (prefers-reduced-motion:reduce){.aura span{animation:none}.btn,.shot{transition:none}}
+</style>
+</head>
+<body>
+  <div class="aura" aria-hidden="true"><span class="a1"></span><span class="a2"></span><span class="a3"></span></div>
+  <div class="vignette" aria-hidden="true"></div>
+
+  <main>
+    <img class="icon" src="icon.png" alt="Unslept">
+    <h1>Mac не уснёт,<br>пока <em>ИИ пишет код</em></h1>
+    <p class="tagline">Нативная утилита для macOS, которая держит Mac бодрым даже с закрытой крышкой. Живёт в строке меню, включается одним кликом.</p>
+
+    <div class="cta">
+      <a class="btn btn-primary" href="https://github.com/unkidotaplug/Unslept/releases/latest/download/Unslept.dmg">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14" stroke="#06181d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Скачать для macOS
+      </a>
+      <a class="btn btn-ghost" href="https://github.com/unkidotaplug/Unslept">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.49 0-.24-.01-.88-.01-1.73-2.78.62-3.37-1.37-3.37-1.37-.46-1.18-1.11-1.5-1.11-1.5-.91-.64.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.55-1.14-4.55-5.07 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.72 0 0 .84-.27 2.75 1.05a9.4 9.4 0 0 1 5 0c1.91-1.32 2.75-1.05 2.75-1.05.55 1.42.2 2.46.1 2.72.64.72 1.03 1.63 1.03 2.75 0 3.94-2.34 4.81-4.57 5.06.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.49A10.03 10.03 0 0 0 22 12.25C22 6.58 17.52 2 12 2z"/></svg>
+        GitHub
+      </a>
+    </div>
+    <p class="meta">macOS 13+ · Apple Silicon &amp; Intel · ~600 КБ · бесплатно</p>
+
+    <img class="shot" id="shot" src="screenshot.png" alt="Интерфейс Unslept в строке меню">
+
+    <p class="lead">В 2026-м долгие задачи у нейросетей — норма: рефакторинг на часы, генерация целого проекта, агенты без остановки. Прерывать нельзя, а сидеть рядом с ноутом сутками — тоже. Стоит закрыть крышку MacBook — и macOS усыпляет систему, процесс встаёт.<br><br><b>Unslept</b> не даёт Маку заснуть даже с закрытой крышкой. Включил, ушёл по делам — нейронка спокойно дорабатывает.</p>
+
+    <div class="features">
+      <div class="feat"><div class="ico">🔒</div><h3>Закрытая крышка</h3><p>Не спит даже с закрытой крышкой — в отличие от caffeinate и аналогов.</p></div>
+      <div class="feat"><div class="ico">⏱</div><h3>Авто-выключение</h3><p>Mac сам уснёт через 1–8 часов по таймеру, если забыл выключить.</p></div>
+      <div class="feat"><div class="ico">🪶</div><h3>Без зависимостей</h3><p>Нативный Swift, ~600 КБ. Ставить ничего не нужно.</p></div>
+    </div>
+  </main>
+
+  <footer>
+    <a href="https://github.com/unkidotaplug/Unslept">Открытый исходный код · GPLv3</a> · 2026
+  </footer>
+
+<script>
+  // gentle spring tilt on the screenshot following the cursor
+  const shot = document.getElementById('shot');
+  const reduce = matchMedia('(prefers-reduced-motion:reduce)').matches;
+  if (shot && !reduce) {
+    let tx=0, ty=0, vx=0, vy=0, cx=0, cy=0;
+    addEventListener('pointermove', e => {
+      tx = (e.clientX / innerWidth - 0.5) * 10;
+      ty = (e.clientY / innerHeight - 0.5) * -10;
+    });
+    let last = performance.now();
+    (function loop(now){
+      const dt = Math.min((now-last)/1000, 0.04); last = now;
+      vx += (-150*(cx-tx) - 16*vx)*dt; cx += vx*dt;
+      vy += (-150*(cy-ty) - 16*vy)*dt; cy += vy*dt;
+      shot.style.transform = `perspective(1100px) rotateY(${cx.toFixed(2)}deg) rotateX(${cy.toFixed(2)}deg)`;
+      requestAnimationFrame(loop);
+    })(performance.now());
+  }
+</script>
+</body>
+</html>
