@@ -25,8 +25,10 @@ mkdir -p "$MACOS_DIR" "$CONTENTS/Resources"
 cp "$BINARY" "$MACOS_DIR/$APP_NAME"
 chmod +x "$MACOS_DIR/$APP_NAME"
 
-# ── Resources: app icon ─────────────────────────────────────────────────────
-cp "$DIR/assets/Unslept.icns" "$CONTENTS/Resources/"
+# ── Resources: app icon + menu-bar icons ───────────────────────────────────
+cp "$DIR/assets/Unslept.icns"        "$CONTENTS/Resources/"
+cp "$DIR/assets/menubar/bar_on.png"  "$CONTENTS/Resources/"
+cp "$DIR/assets/menubar/bar_off.png" "$CONTENTS/Resources/"
 
 # ── Info.plist ─────────────────────────────────────────────────────────────
 cat > "$CONTENTS/Info.plist" << PLIST
