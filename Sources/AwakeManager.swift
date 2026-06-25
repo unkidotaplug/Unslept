@@ -11,7 +11,6 @@
 //
 
 import Foundation
-import IOKit.pwr_mgt
 import ServiceManagement
 import Combine
 
@@ -27,17 +26,11 @@ final class AwakeManager: ObservableObject {
     /// Whether the app is registered to launch at login.
     @Published var launchAtLogin: Bool = false
 
-    private var assertionID: IOPMAssertionID = 0
+    // caffeinate -i prevents idle system sleep; -d prevents display sleep.
+    // Both run without admin rights and are the Apple-recommended mechanism.
+    private var caffeinateProc: Process?
     private var timerCancellable: AnyCancellable?
     private var startDate: Date?
-
-    // NOTE: this assertion only blocks *idle* sleep. It does NOT stop sleep
-    // when the lid is physically closed (clamshell sleep) — macOS handles that
-    // separately and ignores assertions. For closed-lid we use `pmset
-    // disablesleep` below, which is the only mechanism that works without an
-    // external display (and requires admin rights).
-    private let assertionType = kIOPMAssertionTypePreventSystemSleep as CFString
-    private let assertionReason = "Unslept: keeping your Mac awake" as CFString
 
     init() {
         autoOffMinutes = UserDefaults.standard.integer(forKey: "autoOffMinutes")
@@ -48,13 +41,18 @@ final class AwakeManager: ObservableObject {
 
     func activate() {
         guard !isActive else { return }
-        let result = IOPMAssertionCreateWithName(
-            assertionType,
-            IOPMAssertionLevel(kIOPMAssertionLevelOn),
-            assertionReason,
-            &assertionID
-        )
-        guard result == kIOReturnSuccess else { return }
+
+        // Block idle sleep + display sleep (no admin needed)
+        let proc = Process()
+        proc.launchPath = "/usr/bin/caffeinate"
+        proc.arguments = ["-i", "-d"]
+        do {
+            try proc.run()
+            caffeinateProc = proc
+        } catch {
+            NSLog("Unslept: caffeinate failed: \(error)")
+            return
+        }
 
         isActive = true
         startDate = Date()
@@ -63,17 +61,20 @@ final class AwakeManager: ObservableObject {
             .autoconnect()
             .sink { [weak self] _ in self?.tick() }
 
-        // the part that actually keeps the Mac awake with the lid closed
+        // pmset disablesleep covers lid-close (clamshell) sleep — caffeinate
+        // alone can't prevent that. Requires admin via osascript prompt.
         setDisableSleep(true)
     }
 
     func deactivate() {
         guard isActive else { return }
         setDisableSleep(false)   // re-allow lid-close sleep
+
+        caffeinateProc?.terminate()
+        caffeinateProc = nil
+
         timerCancellable?.cancel()
         timerCancellable = nil
-        IOPMAssertionRelease(assertionID)
-        assertionID = 0
         isActive = false
         startDate = nil
         elapsedSeconds = 0
