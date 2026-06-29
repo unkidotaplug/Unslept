@@ -1,17 +1,19 @@
 <div align="center">
   <img src="assets/icon.png" width="120" alt="Unslept">
   <h1>Unslept</h1>
-  <p><b>Keep your Mac awake while AI writes code — even with the lid closed.</b></p>
+  <p><b>Keep your computer awake while AI writes code — even with the lid closed.</b></p>
 
   <p>
-    <a href="https://github.com/unkidotaplug/Unslept/releases/latest/download/Unslept.dmg"><b>⬇️ Download Unslept.dmg</b></a>
+    <a href="https://github.com/unkidotaplug/Unslept/releases/latest/download/Unslept.dmg"><b>⬇️ Download Unslept.dmg</b></a> ·
+    <a href="https://unkidotaplug.github.io/Unslept/"><b>🌐 Website</b></a>
   </p>
 
   <p>
     <img src="https://img.shields.io/badge/macOS-13%2B-blue" alt="macOS 13+">
-    <img src="https://img.shields.io/badge/arch-Apple_Silicon_%7C_Intel-success" alt="arch">
+    <img src="https://img.shields.io/badge/Windows-10%2F11-blue" alt="Windows 10/11">
+    <img src="https://img.shields.io/badge/Linux-systemd-blue" alt="Linux systemd">
     <img src="https://img.shields.io/badge/deps-none-brightgreen" alt="no deps">
-    <img src="https://img.shields.io/badge/version-1.2.1-blueviolet" alt="version">
+    <img src="https://img.shields.io/badge/version-1.3.0-blueviolet" alt="version">
   </p>
 
   <img src="assets/screenshot.png" width="300" alt="Unslept menu bar popover">
@@ -62,6 +64,26 @@ In 2026, long-running AI tasks are the norm: hours-long refactors, generating wh
 ## How it works
 
 Standard power assertions (`caffeinate -s`, `IOPMAssertion`) only block *idle* sleep. When the lid closes, macOS sleeps **regardless** of them — that's a separate mechanism (clamshell sleep). The only way to keep the system awake with the lid closed and no external display is the system flag `pmset disablesleep 1`, which Unslept sets on enable (with admin rights) and clears on disable.
+
+## Cross-platform CLI (Windows / Linux)
+
+The polished menu-bar app above is macOS-only. For **Windows** and **Linux** there's a lightweight command-line version that uses the same idea — block idle sleep *and* the lid-close action separately — written in pure Python (standard library only, no third-party packages).
+
+```bash
+pipx install git+https://github.com/unkidotaplug/Unslept
+unslept                 # keep awake until Ctrl+C
+unslept --timer 120     # auto-off after 120 minutes
+```
+
+| OS | Idle sleep | Lid-close | Privileges |
+|---|---|---|---|
+| **macOS** | `caffeinate -i -d` | `pmset disablesleep` | `sudo` for the lid part |
+| **Windows 10/11** | `SetThreadExecutionState` | `powercfg` LIDACTION → *Do nothing* (backed up & restored) | **Administrator** terminal |
+| **Linux (systemd)** | `systemd-inhibit` | `--what=handle-lid-switch` inhibitor lock | none |
+
+On every platform the original sleep/lid behavior is **always restored** on exit — clean quit, `Ctrl+C`, or crash. On Windows the original lid action is saved to disk before being changed, so even a hard kill is recovered on the next launch.
+
+> ⚠️ **Windows:** run the terminal *as Administrator*, otherwise the lid-close action can't be changed and closing the lid will still sleep the PC.
 
 ## Build from source
 

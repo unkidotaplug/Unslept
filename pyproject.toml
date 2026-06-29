@@ -1,0 +1,26 @@
+# Cross-platform CLI (Windows / Linux / headless macOS).
+# The native macOS menu-bar .app is built separately via build.sh.
+[project]
+name = "unslept"
+version = "1.3.0"
+description = "Keep your computer awake — even with the lid closed. Cross-platform (macOS, Windows, Linux)."
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "GPL-3.0-or-later" }
+authors = [{ name = "unkidotaplug" }]
+keywords = ["sleep", "caffeinate", "keep-awake", "lid", "macos", "windows", "linux"]
+dependencies = []  # standard library only (ctypes, subprocess, argparse)
+
+[project.urls]
+Homepage = "https://unkidotaplug.github.io/Unslept/"
+Repository = "https://github.com/unkidotaplug/Unslept"
+
+[project.scripts]
+unslept = "unslept.core:main"
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["unslept", "unslept.platforms"]

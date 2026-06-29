@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Unslept — Mac не уснёт, пока ИИ пишет код</title>
-<meta name="description" content="Нативная утилита для macOS: не даёт Маку уснуть даже с закрытой крышкой, пока работает нейросеть.">
+<meta name="description" content="Нативная утилита: не даёт компьютеру уснуть даже с закрытой крышкой, пока работает нейросеть. macOS, Windows, Linux.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
@@ -19,6 +19,7 @@
     --border: rgba(20,24,28,.11);
     --serif: "Playfair Display", Georgia, "Times New Roman", serif;
     --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
     --spring: cubic-bezier(.34,1.56,.64,1);
   }
   * { margin: 0; padding: 0; box-sizing: border-box }
@@ -31,7 +32,6 @@
     overflow-x: hidden;
   }
 
-  /* cursor spotlight */
   .spotlight {
     position: fixed; inset: 0; z-index: 0; pointer-events: none;
     background: radial-gradient(520px circle at var(--cx,50%) var(--cy,40%),
@@ -39,9 +39,7 @@
   }
 
   /* ─── Header ─────────────────────────────────────────────────────── */
-  header {
-    position: fixed; top: 14px; left: 0; right: 0; z-index: 100; padding: 0 20px;
-  }
+  header { position: fixed; top: 14px; left: 0; right: 0; z-index: 100; padding: 0 20px }
   .nav {
     max-width: 1100px; margin: 0 auto;
     display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px;
@@ -49,37 +47,19 @@
     backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--border); border-radius: 18px; padding: 9px 14px;
   }
-
-  /* left: brand */
-  .brand {
-    display: flex; align-items: center; gap: 8px;
-    font-weight: 600; font-size: 15px; letter-spacing: -.2px;
-  }
+  .brand { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 15px; letter-spacing: -.2px }
   .brand img { width: 28px; height: 28px; border-radius: 7px }
   .v-chip {
     font-size: 11px; font-weight: 500; color: var(--ink-dim);
     background: rgba(20,24,28,.06); border: 1px solid var(--border);
     border-radius: 6px; padding: 2px 7px;
   }
-
-  /* center: status pills */
-  .nav-center {
-    display: flex; align-items: center; gap: 6px;
-  }
-  .pill {
-    font-size: 11.5px; font-weight: 500; color: var(--ink-dim);
-    background: rgba(20,24,28,.05); border: 1px solid var(--border);
-    border-radius: 20px; padding: 4px 11px; white-space: nowrap;
-  }
-
-  /* right: nav + cta */
-  .nav-right {
-    display: flex; align-items: center; gap: 4px; justify-content: flex-end;
-  }
+  .nav-center { display: flex; align-items: center; gap: 4px; justify-self: center }
+  .nav-right { display: flex; align-items: center; gap: 4px; justify-content: flex-end }
   .nav-a {
     color: var(--ink-dim); text-decoration: none; font-size: 13.5px; font-weight: 500;
-    padding: 7px 10px; border-radius: 9px;
-    transition: color .15s, background .15s; display: flex; align-items: center;
+    padding: 7px 11px; border-radius: 9px; transition: color .15s, background .15s;
+    display: flex; align-items: center; gap: 6px;
   }
   .nav-a:hover { color: var(--ink); background: rgba(20,24,28,.06) }
   .nav-a svg { width: 18px; height: 18px; fill: var(--ink-dim); transition: fill .15s }
@@ -91,39 +71,25 @@
     transition: transform .35s var(--spring), box-shadow .3s ease;
   }
   .btn svg { width: 17px; height: 17px; flex-shrink: 0 }
-  .btn-dk {
-    background: var(--accent); color: #fff; border-radius: 11px;
-    box-shadow: 0 4px 14px -5px rgba(12,32,40,.5);
-  }
+  .btn-dk { background: var(--accent); color: #fff; border-radius: 11px; box-shadow: 0 4px 14px -5px rgba(12,32,40,.5) }
   .btn-dk:hover { transform: translateY(-2px); box-shadow: 0 10px 22px -4px rgba(12,32,40,.55) }
-  .btn-ghost {
-    background: transparent; color: var(--ink); border-radius: 11px;
-    border: 1px solid var(--border);
-  }
+  .btn-ghost { background: transparent; color: var(--ink); border-radius: 11px; border: 1px solid var(--border) }
   .btn-ghost:hover { transform: translateY(-2px); background: rgba(20,24,28,.04) }
   .nav .btn-dk { height: 36px; padding: 0 15px; font-size: 13px }
 
   /* ─── Section 1 · Hero ───────────────────────────────────────────── */
   .hero {
-    position: relative; z-index: 1;
-    min-height: 100dvh;
+    position: relative; z-index: 1; min-height: 100dvh;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     text-align: center; padding: 100px 24px 72px;
   }
-  h1 {
-    font-family: var(--serif); font-weight: 600;
-    font-size: clamp(48px, 9.5vw, 100px); line-height: 1.02; letter-spacing: -.5px;
-  }
+  h1 { font-family: var(--serif); font-weight: 600; font-size: clamp(48px, 9.5vw, 100px); line-height: 1.02; letter-spacing: -.5px }
   h1 em { font-style: italic; color: var(--ink-dim) }
-  .tagline {
-    margin: 22px auto 0; max-width: 460px;
-    font-size: clamp(15px, 2vw, 17.5px); line-height: 1.65; color: var(--ink-dim);
-  }
+  .tagline { margin: 22px auto 0; max-width: 470px; font-size: clamp(15px, 2vw, 17.5px); line-height: 1.65; color: var(--ink-dim) }
   .cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 56px }
   .cta .btn { height: 54px; padding: 0 28px; font-size: 15.5px }
   .meta { margin-top: 16px; font-size: 12px; color: var(--ink-faint) }
 
-  /* scroll cue */
   .scroll-cue {
     position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%);
     display: flex; flex-direction: column; align-items: center; gap: 7px;
@@ -131,68 +97,103 @@
     animation: bob 2.6s ease-in-out infinite;
   }
   .scroll-cue svg { width: 15px; height: 15px; opacity: .45 }
-  @keyframes bob {
-    0%,100% { transform: translateX(-50%) translateY(0) }
-    50%      { transform: translateX(-50%) translateY(6px) }
-  }
+  @keyframes bob { 0%,100% { transform: translateX(-50%) translateY(0) } 50% { transform: translateX(-50%) translateY(6px) } }
 
   /* ─── Section 2 · Product ────────────────────────────────────────── */
   .product {
     position: relative; z-index: 1;
-    min-height: 100dvh;
     display: flex; flex-direction: column; align-items: center;
-    justify-content: center;
-    padding: 80px 24px 56px; gap: 52px;
+    padding: 96px 24px 64px; gap: 64px;
   }
-
-  /* screenshot */
   .stage { display: flex; justify-content: center; perspective: 1400px }
-  .shot-wrap {
-    position: relative; width: min(300px, 78vw); border-radius: 24px;
-    will-change: transform; transform-style: preserve-3d;
-  }
-  .shot-wrap img {
-    display: block; width: 100%; border-radius: 24px;
-    box-shadow: 0 44px 88px -24px rgba(12,32,40,.52), 0 0 0 1px rgba(20,24,28,.07);
-  }
+  .shot-wrap { position: relative; width: min(300px, 78vw); border-radius: 24px; will-change: transform; transform-style: preserve-3d }
+  .shot-wrap img { display: block; width: 100%; border-radius: 24px; box-shadow: 0 44px 88px -24px rgba(12,32,40,.52), 0 0 0 1px rgba(20,24,28,.07) }
   .shot-wrap .spec {
     position: absolute; inset: 0; border-radius: 24px; pointer-events: none;
-    background: radial-gradient(200px circle at var(--mx,50%) var(--my,0%),
-      rgba(255,255,255,.36), transparent 60%);
+    background: radial-gradient(200px circle at var(--mx,50%) var(--my,0%), rgba(255,255,255,.36), transparent 60%);
     mix-blend-mode: overlay;
   }
 
+  /* ─── Downloads / Версии ─────────────────────────────────────────── */
+  .downloads { width: 100%; max-width: 940px; scroll-margin-top: 90px }
+  .dl-head { text-align: center; margin-bottom: 32px }
+  .dl-head h2 { font-family: var(--serif); font-weight: 600; font-size: clamp(30px, 5vw, 46px); letter-spacing: -.4px }
+  .dl-head p { margin-top: 10px; font-size: 15px; color: var(--ink-dim) }
+  .dl-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px }
+  .dl-card {
+    position: relative; min-width: 0; background: var(--card); border: 1px solid var(--border);
+    border-radius: 20px; padding: 24px 22px; display: flex; flex-direction: column; gap: 14px;
+    transition: border-color .25s, box-shadow .25s, transform .25s;
+  }
+  .dl-card.is-yours {
+    border-color: rgba(12,32,40,.45);
+    box-shadow: 0 18px 40px -22px rgba(12,32,40,.5);
+    transform: translateY(-4px);
+  }
+  .yours-tag {
+    position: absolute; top: -10px; left: 22px; display: none;
+    background: var(--accent); color: #fff; font-size: 11px; font-weight: 600;
+    padding: 3px 10px; border-radius: 20px;
+  }
+  .dl-card.is-yours .yours-tag { display: block }
+  .dl-icn {
+    width: 46px; height: 46px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+    background: rgba(12,32,40,.06); border: 1px solid var(--border);
+  }
+  .dl-icn svg { width: 24px; height: 24px; fill: var(--accent) }
+  .dl-os { display: flex; align-items: center; gap: 8px; flex-wrap: wrap }
+  .dl-os h3 { font-size: 17px; font-weight: 600 }
+  .type-chip { font-size: 11px; font-weight: 600; color: var(--ink-dim); background: rgba(20,24,28,.06); border-radius: 6px; padding: 2px 8px }
+  .dl-note { font-size: 12.5px; line-height: 1.5; color: var(--ink-faint); margin-top: -4px }
+  .dl-action { margin-top: auto }
+  .dl-action .btn { width: 100%; height: 46px; justify-content: center; font-size: 14px }
+
+  .cmd {
+    display: flex; align-items: center; gap: 8px; background: #0c2028; color: #e7eef0;
+    border-radius: 11px; padding: 11px 12px; font-family: var(--mono); font-size: 12px;
+    overflow: hidden;
+  }
+  .cmd code { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0 }
+  .cmd button {
+    flex-shrink: 0; background: rgba(255,255,255,.12); border: none; color: #fff; cursor: pointer;
+    border-radius: 7px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+    transition: background .15s;
+  }
+  .cmd button:hover { background: rgba(255,255,255,.22) }
+  .cmd button svg { width: 14px; height: 14px; fill: #fff }
+  .cmd-run { margin-top: 8px; font-size: 12px; color: var(--ink-dim) }
+  .cmd-run b { font-family: var(--mono); font-weight: 600; color: var(--ink) }
+
   /* features */
-  .features {
-    display: grid; grid-template-columns: repeat(3,1fr); gap: 14px;
-    width: 100%; max-width: 820px;
-  }
-  .feat {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 18px; padding: 22px 20px;
-  }
+  .features { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; width: 100%; max-width: 820px }
+  .feat { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 22px 20px }
   .feat .ico { font-size: 22px; margin-bottom: 10px }
   .feat h3 { font-size: 14.5px; font-weight: 600; margin-bottom: 5px }
   .feat p { font-size: 13px; line-height: 1.55; color: var(--ink-dim) }
+  .feat code { font-family: var(--mono); font-size: 12px; background: rgba(20,24,28,.06); padding: 1px 5px; border-radius: 5px }
 
-  footer {
-    color: var(--ink-faint); font-size: 12.5px; text-align: center;
-  }
+  footer { color: var(--ink-faint); font-size: 12.5px; text-align: center }
   footer a { color: var(--ink-dim); text-decoration: none }
   footer a:hover { color: var(--ink) }
 
-  /* ─── Responsive ─────────────────────────────────────────────────── */
-  @media (max-width: 720px) {
+  .toast {
+    position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--accent); color: #fff; font-size: 13px; font-weight: 500;
+    padding: 10px 18px; border-radius: 12px; opacity: 0; pointer-events: none;
+    transition: opacity .2s, transform .2s; z-index: 200;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0) }
+
+  @media (max-width: 760px) {
     .nav { grid-template-columns: 1fr auto }
     .nav-center { display: none }
+    .dl-grid { grid-template-columns: 1fr }
     .features { grid-template-columns: 1fr }
   }
-  @media (max-width: 480px) {
-    .nav-a:not(.nav-dl) { display: none }
-  }
+  @media (max-width: 480px) { .nav-right .nav-a:not(.gh) { display: none } }
   @media (prefers-reduced-motion: reduce) {
     .shot-wrap { transform: none !important }
-    .btn, .nav-a { transition: none }
+    .btn, .nav-a, .dl-card { transition: none }
     .scroll-cue { animation: none }
   }
 </style>
@@ -206,21 +207,17 @@
     <span class="brand">
       <img src="icon.png" alt="">
       Unslept
-      <span class="v-chip">v1.2.1</span>
+      <span class="v-chip">v1.3.0</span>
     </span>
     <span class="nav-center">
-      <span class="pill">macOS 13+</span>
-      <span class="pill">Free &amp; Open Source</span>
+      <a class="nav-a" href="#downloads">Версии</a>
+      <a class="nav-a" href="#features">Возможности</a>
     </span>
     <span class="nav-right">
-      <a class="nav-a" href="#product">Features</a>
-      <a class="nav-a" href="https://github.com/unkidotaplug/Unslept" title="GitHub">
+      <a class="nav-a gh" href="https://github.com/unkidotaplug/Unslept" title="GitHub">
         <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.49 0-.24-.01-.88-.01-1.73-2.78.62-3.37-1.37-3.37-1.37-.46-1.18-1.11-1.5-1.11-1.5-.91-.64.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.55-1.14-4.55-5.07 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.72 0 0 .84-.27 2.75 1.05a9.4 9.4 0 0 1 5 0c1.91-1.32 2.75-1.05 2.75-1.05.55 1.42.2 2.46.1 2.72.64.72 1.03 1.63 1.03 2.75 0 3.94-2.34 4.81-4.57 5.06.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.49A10.03 10.03 0 0 0 22 12.25C22 6.58 17.52 2 12 2z"/></svg>
       </a>
-      <a class="btn btn-dk nav-dl" href="https://github.com/unkidotaplug/Unslept/releases/latest/download/Unslept.dmg">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.4 12.5c0-2.2 1.8-3.3 1.9-3.4-1-1.5-2.7-1.7-3.3-1.7-1.4-.1-2.7.8-3.4.8s-1.8-.8-2.9-.8c-1.5 0-2.9.9-3.6 2.2-1.6 2.7-.4 6.8 1.1 9 .8 1.1 1.6 2.3 2.8 2.2 1.1 0 1.5-.7 2.9-.7s1.7.7 2.9.7 1.9-1 2.7-2.1c.8-1.2 1.2-2.4 1.2-2.5-.1 0-2.3-.9-2.3-3.7zM14.2 5.7c.6-.8 1-1.8.9-2.9-.9.1-2 .6-2.7 1.4-.6.7-1.1 1.7-.9 2.7 1 .1 2.1-.5 2.7-1.2z"/></svg>
-        Download
-      </a>
+      <a class="btn btn-dk" id="navDownload" href="#downloads">Скачать</a>
     </span>
   </nav>
 </header>
@@ -228,25 +225,25 @@
 <!-- ── Section 1 · Hero ───────────────────────────────────────────── -->
 <section class="hero">
   <h1>Mac не уснёт,<br><em>пока ИИ пишет код</em></h1>
-  <p class="tagline">Нативная утилита для macOS. Держит Mac бодрым даже с закрытой крышкой — включается одним кликом из строки меню.</p>
+  <p class="tagline">Утилита, которая держит компьютер бодрым даже с закрытой крышкой. macOS, Windows и Linux — включается одним кликом.</p>
   <div class="cta">
-    <a class="btn btn-dk" href="https://github.com/unkidotaplug/Unslept/releases/latest/download/Unslept.dmg">
+    <a class="btn btn-dk" id="heroDownload" href="#downloads">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.4 12.5c0-2.2 1.8-3.3 1.9-3.4-1-1.5-2.7-1.7-3.3-1.7-1.4-.1-2.7.8-3.4.8s-1.8-.8-2.9-.8c-1.5 0-2.9.9-3.6 2.2-1.6 2.7-.4 6.8 1.1 9 .8 1.1 1.6 2.3 2.8 2.2 1.1 0 1.5-.7 2.9-.7s1.7.7 2.9.7 1.9-1 2.7-2.1c.8-1.2 1.2-2.4 1.2-2.5-.1 0-2.3-.9-2.3-3.7zM14.2 5.7c.6-.8 1-1.8.9-2.9-.9.1-2 .6-2.7 1.4-.6.7-1.1 1.7-.9 2.7 1 .1 2.1-.5 2.7-1.2z"/></svg>
-      Скачать для macOS
+      <span id="heroLabel">Скачать</span>
     </a>
     <a class="btn btn-ghost" href="https://github.com/unkidotaplug/Unslept">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.49 0-.24-.01-.88-.01-1.73-2.78.62-3.37-1.37-3.37-1.37-.46-1.18-1.11-1.5-1.11-1.5-.91-.64.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.55-1.14-4.55-5.07 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.72 0 0 .84-.27 2.75 1.05a9.4 9.4 0 0 1 5 0c1.91-1.32 2.75-1.05 2.75-1.05.55 1.42.2 2.46.1 2.72.64.72 1.03 1.63 1.03 2.75 0 3.94-2.34 4.81-4.57 5.06.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.49A10.03 10.03 0 0 0 22 12.25C22 6.58 17.52 2 12 2z"/></svg>
       GitHub
     </a>
   </div>
-  <p class="meta">macOS 13+ · Apple Silicon &amp; Intel · ~600 КБ · бесплатно</p>
+  <p class="meta">macOS 13+ · Windows 10/11 · Linux (systemd) · open-source</p>
   <div class="scroll-cue" aria-hidden="true">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
   </div>
 </section>
 
 <!-- ── Section 2 · Product ────────────────────────────────────────── -->
-<section class="product" id="product">
+<section class="product">
   <div class="stage">
     <div class="shot-wrap" id="shotWrap">
       <img src="screenshot.png" alt="Интерфейс Unslept в строке меню">
@@ -254,22 +251,76 @@
     </div>
   </div>
 
-  <div class="features">
-    <div class="feat">
-      <div class="ico">🔒</div>
-      <h3>Закрытая крышка</h3>
-      <p>Держит Mac активным даже с закрытой крышкой — в отличие от caffeinate и аналогов.</p>
+  <!-- Версии -->
+  <div class="downloads" id="downloads">
+    <div class="dl-head">
+      <h2>Версии</h2>
+      <p id="dlSub">Выбери свою систему — мы определили её автоматически.</p>
     </div>
-    <div class="feat">
-      <div class="ico">⏱</div>
-      <h3>Авто-выключение</h3>
-      <p>Mac сам уснёт через 1–8 часов по таймеру, если забыл выключить.</p>
+    <div class="dl-grid">
+
+      <!-- macOS -->
+      <article class="dl-card" data-os="mac">
+        <span class="yours-tag">Ваша система</span>
+        <div class="dl-icn">
+          <svg viewBox="0 0 24 24"><path d="M16.4 12.5c0-2.2 1.8-3.3 1.9-3.4-1-1.5-2.7-1.7-3.3-1.7-1.4-.1-2.7.8-3.4.8s-1.8-.8-2.9-.8c-1.5 0-2.9.9-3.6 2.2-1.6 2.7-.4 6.8 1.1 9 .8 1.1 1.6 2.3 2.8 2.2 1.1 0 1.5-.7 2.9-.7s1.7.7 2.9.7 1.9-1 2.7-2.1c.8-1.2 1.2-2.4 1.2-2.5-.1 0-2.3-.9-2.3-3.7zM14.2 5.7c.6-.8 1-1.8.9-2.9-.9.1-2 .6-2.7 1.4-.6.7-1.1 1.7-.9 2.7 1 .1 2.1-.5 2.7-1.2z"/></svg>
+        </div>
+        <div class="dl-os"><h3>macOS</h3><span class="type-chip">Нативное приложение</span></div>
+        <p class="dl-note">Liquid-glass приложение в строке меню. macOS 13+, Apple Silicon &amp; Intel. ~600 КБ.</p>
+        <div class="dl-action">
+          <a class="btn btn-dk" href="https://github.com/unkidotaplug/Unslept/releases/latest/download/Unslept.dmg">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 20h14v-2H5v2zM13 4h-2v9L8.5 10.5 7 12l5 5 5-5-1.5-1.5L13 13V4z"/></svg>
+            Скачать .dmg
+          </a>
+        </div>
+      </article>
+
+      <!-- Windows -->
+      <article class="dl-card" data-os="windows">
+        <span class="yours-tag">Ваша система</span>
+        <div class="dl-icn">
+          <svg viewBox="0 0 24 24"><path d="M3 5.4 10.5 4.2v7.3H3V5.4zM11.4 4.05 21 2.5v8.9h-9.6V4.05zM3 12.5h7.5v7.1L3 18.4v-5.9zM11.4 12.5H21v9l-9.6-1.5v-7.5z"/></svg>
+        </div>
+        <div class="dl-os"><h3>Windows</h3><span class="type-chip">CLI</span></div>
+        <p class="dl-note">Windows 10/11. Блокирует idle-сон и действие крышки через powercfg. Нужен Python 3.8+ и терминал «от администратора».</p>
+        <div class="dl-action">
+          <div class="cmd">
+            <code id="cmd-win">pipx install git+https://github.com/unkidotaplug/Unslept</code>
+            <button data-copy="cmd-win" title="Копировать">
+              <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+            </button>
+          </div>
+          <p class="cmd-run">Запуск: <b>unslept</b></p>
+        </div>
+      </article>
+
+      <!-- Linux -->
+      <article class="dl-card" data-os="linux">
+        <span class="yours-tag">Ваша система</span>
+        <div class="dl-icn">
+          <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zm2.7 4.3a1 1 0 0 0 0 1.4L9 12l-2.3 2.3a1 1 0 1 0 1.4 1.4l3-3a1 1 0 0 0 0-1.4l-3-3a1 1 0 0 0-1.4 0zM13 14a1 1 0 0 0 0 2h4a1 1 0 0 0 0-2h-4z"/></svg>
+        </div>
+        <div class="dl-os"><h3>Linux</h3><span class="type-chip">CLI</span></div>
+        <p class="dl-note">Arch и любой дистрибутив с systemd. Держит inhibitor-lock на крышку — без root, без правки конфигов.</p>
+        <div class="dl-action">
+          <div class="cmd">
+            <code id="cmd-linux">pipx install git+https://github.com/unkidotaplug/Unslept</code>
+            <button data-copy="cmd-linux" title="Копировать">
+              <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+            </button>
+          </div>
+          <p class="cmd-run">Запуск: <b>unslept</b></p>
+        </div>
+      </article>
+
     </div>
-    <div class="feat">
-      <div class="ico">🪶</div>
-      <h3>Без зависимостей</h3>
-      <p>Нативный Swift, ~600 КБ. Ничего не нужно устанавливать дополнительно.</p>
-    </div>
+  </div>
+
+  <!-- Возможности -->
+  <div class="features" id="features">
+    <div class="feat"><div class="ico">🔒</div><h3>Закрытая крышка</h3><p>Держит компьютер активным даже с закрытой крышкой — на всех трёх ОС.</p></div>
+    <div class="feat"><div class="ico">⏱</div><h3>Авто-выключение</h3><p>Сам уснёт по таймеру, если забыл выключить. Флаг <code>--timer</code> в CLI.</p></div>
+    <div class="feat"><div class="ico">🪶</div><h3>Без зависимостей</h3><p>Mac — нативный Swift. Win/Linux — Python только из стандартной библиотеки.</p></div>
   </div>
 
   <footer>
@@ -277,18 +328,66 @@
   </footer>
 </section>
 
+<div class="toast" id="toast">Скопировано</div>
+
 <script>
   const reduce = matchMedia('(prefers-reduced-motion:reduce)').matches;
-  const wrap = document.getElementById('shotWrap');
-  const spec = wrap?.querySelector('.spec');
 
-  // cursor spotlight
+  /* ── OS detection ──────────────────────────────────────────────── */
+  function detectOS() {
+    const ua = navigator.userAgent;
+    const p = (navigator.userAgentData?.platform || navigator.platform || '').toLowerCase();
+    if (/win/.test(p) || /windows/i.test(ua)) return 'windows';
+    if (/linux/.test(p) && !/android/i.test(ua)) return 'linux';
+    if (/mac/.test(p) || /mac os x/i.test(ua)) return 'mac';
+    return 'mac';
+  }
+  const os = detectOS();
+  const names = { mac: 'macOS', windows: 'Windows', linux: 'Linux' };
+
+  // highlight the matching version card
+  const yours = document.querySelector(`.dl-card[data-os="${os}"]`);
+  if (yours) {
+    yours.classList.add('is-yours');
+    document.getElementById('dlSub').textContent =
+      `Похоже, у тебя ${names[os]} — мы выделили нужную версию. Остальные системы рядом.`;
+  }
+
+  // hero + header buttons follow the detected OS
+  const heroBtn = document.getElementById('heroDownload');
+  const heroLabel = document.getElementById('heroLabel');
+  const navBtn = document.getElementById('navDownload');
+  if (os === 'mac') {
+    const dmg = 'https://github.com/unkidotaplug/Unslept/releases/latest/download/Unslept.dmg';
+    heroBtn.href = dmg; navBtn.href = dmg;
+    heroLabel.textContent = 'Скачать для macOS';
+  } else {
+    heroBtn.href = '#downloads'; navBtn.href = '#downloads';
+    heroLabel.textContent = `Установить на ${names[os]}`;
+  }
+
+  /* ── copy buttons ──────────────────────────────────────────────── */
+  const toast = document.getElementById('toast');
+  let toastTimer;
+  document.querySelectorAll('.cmd button[data-copy]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const text = document.getElementById(btn.dataset.copy).textContent;
+      try { await navigator.clipboard.writeText(text); } catch (_) {}
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 1600);
+    });
+  });
+
+  /* ── cursor spotlight ──────────────────────────────────────────── */
   addEventListener('pointermove', e => {
     document.body.style.setProperty('--cx', e.clientX + 'px');
     document.body.style.setProperty('--cy', e.clientY + 'px');
   });
 
-  // spring tilt + specular on screenshot
+  /* ── spring tilt + specular on screenshot ──────────────────────── */
+  const wrap = document.getElementById('shotWrap');
+  const spec = wrap?.querySelector('.spec');
   if (wrap && !reduce) {
     let cx=0, cy=0, vx=0, vy=0, tx=0, ty=0, mx=50, my=50;
     addEventListener('pointermove', e => {

@@ -8,3 +8,12 @@ build/
 tools/icon_1024.png
 tools/*.iconset/
 .venv/
+
+# Python (cross-platform CLI)
+__pycache__/
+*.pyc
+*.egg-info/
+.eggs/
+
+# local editor / preview config
+.claude/
